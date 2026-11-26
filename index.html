@@ -231,22 +231,50 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
     });
   }
 
-  function requestData(url,callback) {
+  
+function requestData(url,callback) {
     var xhr = new XMLHttpRequest();
-    xhr.open("GET",url,true);
-    xhr.timeout = 25000;
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4) {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try { callback(null,JSON.parse(xhr.responseText)); }
-          catch(e) { callback(e); }
-        } else callback(new Error("Weather service returned "+xhr.status));
-      }
-    };
-    xhr.onerror = function() { callback(new Error("Network connection failed")); };
-    xhr.ontimeout = function() { callback(new Error("Weather request timed out")); };
-    xhr.send(null);
-  }
+    var completed = false;
+
+    function finish(err,data) {
+      if (completed) return;
+      completed = true;
+      callback(err,data);
+    }
+
+    try {
+      xhr.open("GET",url,true);
+      xhr.timeout = 25000;
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              finish(null,JSON.parse(xhr.responseText));
+            } catch(e) {
+              finish(new Error("Invalid weather response: " + e.message));
+            }
+          } else {
+            finish(new Error("Weather service returned HTTP " + xhr.status));
+          }
+        }
+      };
+
+      xhr.onerror = function() {
+        finish(new Error("Network connection failed"));
+      };
+
+      xhr.ontimeout = function() {
+        finish(new Error("Weather request timed out"));
+      };
+
+      xhr.send(null);
+
+    } catch(e) {
+      finish(new Error("Request could not start: " + e.message));
+    }
+}
+
 
   function loadWeather() {
     var loc = locations[selected];
