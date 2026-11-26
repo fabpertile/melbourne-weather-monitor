@@ -339,7 +339,7 @@ var BOM_FORECAST_URL =
       var d=days[order[j]];
       result.push({
         date:order[j],
-        temp:average(d.temp),
+        temp:maximum(d.temp),
         pressure:average(d.pressure),
         humidity:average(d.humidity),
         uv:maximum(d.uv),
