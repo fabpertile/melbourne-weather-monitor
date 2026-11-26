@@ -82,6 +82,16 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
   .card-value { font-size:21px; }
   .top { gap:4px; }
   select,button { padding:6px; font-size:11px; }
+.clock-large {
+  font-size: 52px !important;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.date-large {
+  font-size: 25px !important;
+  line-height: 1.4;
+}
 }
 </style>
 </head>
@@ -135,8 +145,8 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
   </div>
   <div class="card">
     <div class="card-label">Local Time &amp; Date</div>
-    <div class="card-value" id="clock">--:--</div>
-    <div class="card-small" id="date">--</div>
+    <div class="card-value clock-large" id="clock">--:--</div>
+    <div class="card-small date-large" id="date">--</div>
   </div>
 </div>
 
