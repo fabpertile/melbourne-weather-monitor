@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Melbourne Weather">
 <title>Melbourne Weather Monitor</title>
-
 <style>
 * { box-sizing:border-box; }
 body {
@@ -43,6 +42,7 @@ button { cursor:pointer; }
 .card-value { font-size:25px; margin-top:8px; font-weight:300; }
 .card-small { font-size:11px; color:#9ca3ad; margin-top:4px; }
 .temp { color:#ff625e; }
+.temp-min { color:#70c9f2; }
 .pressure { color:#8bd66c; }
 .humidity { color:#55c8ed; }
 .uv { color:#c28aff; }
@@ -82,17 +82,18 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
   .card-value { font-size:21px; }
   .top { gap:4px; }
   select,button { padding:6px; font-size:11px; }
-.clock-large {
-  font-size: 52px !important;
-  font-weight: bold;
-  line-height: 1.2;
 }
-
+.clock-large {
+  font-size:52px !important;
+  font-weight:bold;
+  line-height:1.2;
+}
 .date-large {
-  font-size: 25px !important;
-  line-height: 1.4;
+  font-size:25px !important;
+  line-height:1.4;
 }
 </style>
+</head>
 
 <body>
 <header>
@@ -105,7 +106,7 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
     <button id="addLocation">+ Add</button>
     <button id="removeLocation">Remove</button>
     <button id="refresh">Refresh</button>
-</div>
+  </div>
 </header>
 
 <div class="cards">
@@ -144,7 +145,7 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
   <div class="card">
     <div class="card-label">Local Time &amp; Date</div>
     <div id="clock" style="font-size:52px !important; font-weight:bold; line-height:1.2;">--:--</div>
-   <div id="date" style="font-size:25px !important; line-height:1.4;">--</div>
+    <div id="date" style="font-size:25px !important; line-height:1.4;">--</div>
   </div>
 </div>
 
@@ -153,15 +154,14 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
     <h2>15 Day Weather History &amp; Forecast</h2>
     <span class="subtitle">DAILY VALUES</span>
   </div>
-
   <div class="legend">
-    <label><input type="checkbox" id="showTemp" checked> <span class="temp">Temperature</span></label>
+    <label><input type="checkbox" id="showTemp" checked> <span class="temp">Maximum Temperature</span></label>
+    <label><span class="temp-min">Minimum Temperature</span></label>
     <label><input type="checkbox" id="showPressure" checked> <span class="pressure">Pressure</span></label>
     <label><input type="checkbox" id="showHumidity" checked> <span class="humidity">Humidity</span></label>
     <label><input type="checkbox" id="showUV" checked> <span class="uv">UV</span></label>
     <label><input type="checkbox" id="showWind" checked> <span class="wind">Wind</span></label>
   </div>
-
   <svg id="chart" viewBox="0 0 1100 390" preserveAspectRatio="none">
     <text x="550" y="190" text-anchor="middle" class="axis-text">Waiting for weather data...</text>
   </svg>
@@ -177,7 +177,6 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
   var defaultLocations = [
     {name:"Melbourne (Olympic Park)",lat:-37.825,lon:144.981}
   ];
-
   var locations = defaultLocations.slice(0);
   try {
     var saved = localStorage.getItem("mwm_locations");
@@ -231,11 +230,9 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
     });
   }
 
-  
-function requestData(url,callback) {
+  function requestData(url,callback) {
     var xhr = new XMLHttpRequest();
     var completed = false;
-
     function finish(err,data) {
       if (completed) return;
       completed = true;
@@ -245,7 +242,6 @@ function requestData(url,callback) {
     try {
       xhr.open("GET",url,true);
       xhr.timeout = 25000;
-
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
           if (xhr.status >= 200 && xhr.status < 300) {
@@ -259,26 +255,23 @@ function requestData(url,callback) {
           }
         }
       };
-
       xhr.onerror = function() {
         finish(new Error("Network connection failed"));
       };
-
       xhr.ontimeout = function() {
         finish(new Error("Weather request timed out"));
       };
-
       xhr.send(null);
-
     } catch(e) {
       finish(new Error("Request could not start: " + e.message));
     }
-}
-var BOM_OBSERVATIONS_URL =
-  "https://www.bom.gov.au/fwo/IDV60901/IDV60901.95936.json";
+  }
 
-var BOM_FORECAST_URL =
-  "https://www.bom.gov.au/fwo/IDV10450.xml";
+  var BOM_OBSERVATIONS_URL =
+    "https://www.bom.gov.au/fwo/IDV60901/IDV60901.95936.json";
+  var BOM_FORECAST_URL =
+    "https://www.bom.gov.au/fwo/IDV10450.xml";
+
   function loadWeather() {
     var loc = locations[selected];
     el("status").innerHTML = "Retrieving weather data... please wait";
@@ -286,7 +279,6 @@ var BOM_FORECAST_URL =
       encodeURIComponent(loc.lat)+"&longitude="+encodeURIComponent(loc.lon)+
       "&hourly=temperature_2m,relative_humidity_2m,pressure_msl,uv_index,wind_direction_10m,wind_speed_10m"+
       "&past_days=7&forecast_days=7&timezone=auto";
-
     requestData(url,function(err,data) {
       if (err || !data || !data.hourly) {
         el("status").innerHTML = "Weather data unavailable. Please try Refresh.";
@@ -309,7 +301,6 @@ var BOM_FORECAST_URL =
       var diff = Math.abs(t-now.getTime());
       if (diff < bestDiff) { bestDiff=diff; best=i; }
     }
-
     el("temperature").innerHTML = number(h.temperature_2m[best],1)+"°";
     el("pressure").innerHTML = number(h.pressure_msl[best],0);
     el("humidity").innerHTML = number(h.relative_humidity_2m[best],0)+"%";
@@ -324,10 +315,20 @@ var BOM_FORECAST_URL =
     for (var i=0;i<h.time.length;i++) {
       var day=h.time[i].substring(0,10);
       if (!days[day]) {
-        days[day]={temp:[],pressure:[],humidity:[],uv:[],wind:[]};
+        days[day]={
+          temp:[],
+          tempMin:[],
+          pressure:[],
+          humidity:[],
+          uv:[],
+          wind:[]
+        };
         order.push(day);
       }
-      if (h.temperature_2m[i] !== null) days[day].temp.push(h.temperature_2m[i]);
+      if (h.temperature_2m[i] !== null) {
+        days[day].temp.push(h.temperature_2m[i]);
+        days[day].tempMin.push(h.temperature_2m[i]);
+      }
       if (h.pressure_msl[i] !== null) days[day].pressure.push(h.pressure_msl[i]);
       if (h.relative_humidity_2m[i] !== null) days[day].humidity.push(h.relative_humidity_2m[i]);
       if (h.uv_index[i] !== null) days[day].uv.push(h.uv_index[i]);
@@ -340,6 +341,7 @@ var BOM_FORECAST_URL =
       result.push({
         date:order[j],
         temp:maximum(d.temp),
+        tempMin:minimum(d.tempMin),
         pressure:average(d.pressure),
         humidity:average(d.humidity),
         uv:maximum(d.uv),
@@ -363,6 +365,13 @@ var BOM_FORECAST_URL =
     return m;
   }
 
+  function minimum(a) {
+    if (!a.length) return null;
+    var m=a[0];
+    for (var i=1;i<a.length;i++) if (a[i]<m) m=a[i];
+    return m;
+  }
+
   function drawChart(data) {
     var days=dailyValues(data);
     var svg=el("chart");
@@ -370,6 +379,7 @@ var BOM_FORECAST_URL =
     var plotW=W-left-right,plotH=H-top-bottom;
     var today=new Date();
     var todayKey=today.getFullYear()+"-"+("0"+(today.getMonth()+1)).slice(-2)+"-"+("0"+today.getDate()).slice(-2);
+
     var series=[
       {key:"temp",id:"showTemp",color:"#ff625e"},
       {key:"pressure",id:"showPressure",color:"#8bd66c"},
@@ -388,6 +398,7 @@ var BOM_FORECAST_URL =
     for (var i=0;i<days.length;i++) {
       if (days[i].date===todayKey) todayIndex=i;
     }
+
     if (todayIndex>=0) {
       var tx=left+(plotW*todayIndex/Math.max(1,days.length-1));
       html+='<line x1="'+tx+'" y1="'+top+'" x2="'+tx+'" y2="'+(top+plotH)+'" class="today-line"/>';
@@ -404,11 +415,14 @@ var BOM_FORECAST_URL =
     for (var s=0;s<series.length;s++) {
       var ser=series[s];
       if (!el(ser.id).checked) continue;
+
       var vals=[];
       for (var q=0;q<days.length;q++) {
         if (days[q][ser.key]!==null) vals.push(days[q][ser.key]);
+        if (ser.key==="temp" && days[q].tempMin!==null) vals.push(days[q].tempMin);
       }
       if (!vals.length) continue;
+
       var min=vals[0],max=vals[0];
       for (var v=1;v<vals.length;v++) {
         if (vals[v]<min) min=vals[v];
@@ -417,12 +431,43 @@ var BOM_FORECAST_URL =
       if (max===min) { max+=1; min-=1; }
 
       var points=[];
+      var minPoints=[];
+
       for (var p=0;p<days.length;p++) {
         var value=days[p][ser.key];
         if (value===null) continue;
         var xx=left+(plotW*p/Math.max(1,days.length-1));
         var yy=top+plotH-((value-min)/(max-min))*plotH;
         points.push({x:xx,y:yy,value:value});
+
+        if (ser.key==="temp" && days[p].tempMin!==null) {
+          var minValue=days[p].tempMin;
+          var minY=top+plotH-((minValue-min)/(max-min))*plotH;
+          minPoints.push({x:xx,y:minY,value:minValue});
+        }
+      }
+
+      if (ser.key==="temp" && points.length && minPoints.length) {
+        var areaPath="";
+        for (var a=0;a<points.length;a++) {
+          areaPath+=(a===0?"M":"L")+points[a].x+","+points[a].y+" ";
+        }
+        for (var b=minPoints.length-1;b>=0;b--) {
+          areaPath+="L"+minPoints[b].x+","+minPoints[b].y+" ";
+        }
+        areaPath+="Z";
+        html+='<path d="'+areaPath+'" fill="#ff8b83" fill-opacity="0.16" stroke="none"/>';
+
+        var minPath="";
+        for (var m=0;m<minPoints.length;m++) {
+          minPath+=(m===0?"M":"L")+minPoints[m].x+","+minPoints[m].y+" ";
+        }
+        html+='<path d="'+minPath+'" fill="none" stroke="#70c9f2" stroke-width="2.5" stroke-linejoin="round"/>';
+        for (var n=0;n<minPoints.length;n++) {
+          var minPt=minPoints[n];
+          html+='<circle cx="'+minPt.x+'" cy="'+minPt.y+'" r="3.2" fill="#70c9f2"/>';
+          html+='<text x="'+minPt.x+'" y="'+(minPt.y+14)+'" text-anchor="middle" fill="#70c9f2" font-size="10">'+number(minPt.value,1)+'</text>';
+        }
       }
 
       var path="";
@@ -430,12 +475,14 @@ var BOM_FORECAST_URL =
         path+=(k===0?"M":"L")+points[k].x+","+points[k].y+" ";
       }
       html+='<path d="'+path+'" fill="none" stroke="'+ser.color+'" stroke-width="2.5" stroke-linejoin="round"/>';
+
       for (var z=0;z<points.length;z++) {
         var pt=points[z];
         html+='<circle cx="'+pt.x+'" cy="'+pt.y+'" r="3.2" fill="'+ser.color+'"/>';
         html+='<text x="'+pt.x+'" y="'+(pt.y-7)+'" text-anchor="middle" fill="'+ser.color+'" font-size="10">'+number(pt.value,ser.key==="pressure"?0:1)+'</text>';
       }
     }
+
     svg.innerHTML=html;
   }
 
@@ -452,22 +499,21 @@ var BOM_FORECAST_URL =
 
     var url = "/api/geocode?name=" +
       encodeURIComponent(city) + "&count=5&language=en&format=json";
-
     requestData(url,function(err,data) {
-  if (err) {
-    alert("Geocoding request failed: " + err);
-    return;
-  }
+      if (err) {
+        alert("Geocoding request failed: " + err);
+        return;
+      }
 
-  if (!data) {
-    alert("No response received from geocoding service.");
-    return;
-  }
+      if (!data) {
+        alert("No response received from geocoding service.");
+        return;
+      }
 
-  if (!data.results || !data.results.length) {
-    alert("No matching city found in geocoding response.");
-    return;
-  }
+      if (!data.results || !data.results.length) {
+        alert("No matching city found in geocoding response.");
+        return;
+      }
 
       var results = data.results;
       var choices = "";
@@ -481,8 +527,8 @@ var BOM_FORECAST_URL =
       var choice = parseInt(answer,10)-1;
 
       if (isNaN(choice) || choice < 0 || choice >= results.length) return;
-
       var place = results[choice];
+
       for (var j=0;j<locations.length;j++) {
         if (Math.abs(locations[j].lat-place.latitude)<0.01 &&
             Math.abs(locations[j].lon-place.longitude)<0.01) {
@@ -496,7 +542,6 @@ var BOM_FORECAST_URL =
         lat: place.latitude,
         lon: place.longitude
       });
-
       saveLocations();
       selected = locations.length-1;
       populateLocations();
@@ -524,8 +569,9 @@ var BOM_FORECAST_URL =
     loadWeather();
   };
   el("refresh").onclick=loadWeather;
-el("addLocation").onclick=addLocation;
-el("removeLocation").onclick=removeLocation;
+  el("addLocation").onclick=addLocation;
+  el("removeLocation").onclick=removeLocation;
+
   var toggles=["showTemp","showPressure","showHumidity","showUV","showWind"];
   for (var t=0;t<toggles.length;t++) {
     el(toggles[t]).onchange=function() {
@@ -536,11 +582,9 @@ el("removeLocation").onclick=removeLocation;
   populateLocations();
   updateClock();
   loadWeather();
-
   window.setInterval(updateClock,30000);
   window.setInterval(loadWeather,3600000);
 })();
 </script>
 </body>
 </html>
-
