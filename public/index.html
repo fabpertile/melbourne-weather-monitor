@@ -450,7 +450,7 @@ var BOM_FORECAST_URL =
 
     el("status").innerHTML = "Searching for " + city + "...";
 
-    vvar url = "/api/geocode?name=" +
+    var url = "/api/geocode?name=" +
       encodeURIComponent(city) + "&count=5&language=en&format=json";
 
     requestData(url,function(err,data) {
