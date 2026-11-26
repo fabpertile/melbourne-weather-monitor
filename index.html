@@ -400,12 +400,84 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
     svg.innerHTML=html;
   }
 
+  function addLocation() {
+    if (locations.length >= 6) {
+      alert("You can save a maximum of six locations.");
+      return;
+    }
+
+    var city = prompt("Enter a city name:");
+    if (!city || !city.replace(/^\s+|\s+$/g,"")) return;
+
+    el("status").innerHTML = "Searching for " + city + "...";
+
+    var url = "https://geocoding-api.open-meteo.com/v1/search?name=" +
+      encodeURIComponent(city) + "&count=5&language=en&format=json";
+
+    requestData(url,function(err,data) {
+      if (err || !data || !data.results || !data.results.length) {
+        alert("City not found. Please try another name.");
+        el("status").innerHTML = "Unable to find that location.";
+        return;
+      }
+
+      var results = data.results;
+      var choices = "";
+      for (var i=0;i<results.length;i++) {
+        choices += (i+1) + ". " + results[i].name +
+          (results[i].admin1 ? ", " + results[i].admin1 : "") +
+          (results[i].country ? ", " + results[i].country : "") + "\n";
+      }
+
+      var answer = prompt("Choose a location number:\n\n" + choices,"1");
+      var choice = parseInt(answer,10)-1;
+
+      if (isNaN(choice) || choice < 0 || choice >= results.length) return;
+
+      var place = results[choice];
+      for (var j=0;j<locations.length;j++) {
+        if (Math.abs(locations[j].lat-place.latitude)<0.01 &&
+            Math.abs(locations[j].lon-place.longitude)<0.01) {
+          alert("This location is already saved.");
+          return;
+        }
+      }
+
+      locations.push({
+        name: place.name + (place.country ? ", " + place.country : ""),
+        lat: place.latitude,
+        lon: place.longitude
+      });
+
+      saveLocations();
+      selected = locations.length-1;
+      populateLocations();
+      loadWeather();
+    });
+  }
+
+  function removeLocation() {
+    if (selected === 0) {
+      alert("Melbourne (Olympic Park) is the default location and cannot be removed.");
+      return;
+    }
+
+    if (!confirm("Remove " + locations[selected].name + "?")) return;
+
+    locations.splice(selected,1);
+    selected = 0;
+    saveLocations();
+    populateLocations();
+    loadWeather();
+  }
+
   el("location").onchange=function() {
     selected=parseInt(this.value,10)||0;
     loadWeather();
   };
   el("refresh").onclick=loadWeather;
-
+el("addLocation").onclick=addLocation;
+el("removeLocation").onclick=removeLocation;
   var toggles=["showTemp","showPressure","showHumidity","showUV","showWind"];
   for (var t=0;t<toggles.length;t++) {
     el(toggles[t]).onchange=function() {
