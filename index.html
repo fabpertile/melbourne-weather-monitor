@@ -415,11 +415,20 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
       encodeURIComponent(city) + "&count=5&language=en&format=json";
 
     requestData(url,function(err,data) {
-      if (err || !data || !data.results || !data.results.length) {
-        alert("City not found. Please try another name.");
-        el("status").innerHTML = "Unable to find that location.";
-        return;
-      }
+  if (err) {
+    alert("Geocoding request failed: " + err);
+    return;
+  }
+
+  if (!data) {
+    alert("No response received from geocoding service.");
+    return;
+  }
+
+  if (!data.results || !data.results.length) {
+    alert("No matching city found in geocoding response.");
+    return;
+  }
 
       var results = data.results;
       var choices = "";
