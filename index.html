@@ -240,7 +240,7 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
 
   function loadWeather() {
     var loc = locations[selected];
-    el("status").innerHTML = "Updating weather data...";
+    el("status").innerHTML = "Retrieving weather data... please wait";
     var url = "https://api.open-meteo.com/v1/forecast?latitude="+
       encodeURIComponent(loc.lat)+"&longitude="+encodeURIComponent(loc.lon)+
       "&hourly=temperature_2m,relative_humidity_2m,pressure_msl,uv_index,wind_direction_10m,wind_speed_10m"+
@@ -248,7 +248,7 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
 
     requestData(url,function(err,data) {
       if (err || !data || !data.hourly) {
-        el("status").innerHTML = "Unable to retrieve weather data. Check your internet connection.";
+        el("status").innerHTML = "Weather data unavailable. Please try Refresh.";
         return;
       }
       currentData = data;
