@@ -10,9 +10,7 @@
 <title>Melbourne Weather Monitor</title>
 
 <style>
-* {
-  box-sizing:border-box;
-}
+* { box-sizing:border-box; }
 
 html, body {
   margin:0;
@@ -29,7 +27,6 @@ body {
   overflow-x:hidden;
 }
 
-/* Main header: date | time | controls */
 header {
   display:flex;
   justify-content:space-between;
@@ -49,7 +46,7 @@ header {
 
 .date {
   font-size:17px;
-  font-weight:400;
+  font-weight:600;
   color:#cbd0d8;
 }
 
@@ -88,25 +85,30 @@ select, button {
   max-width:180px;
 }
 
-button {
-  cursor:pointer;
-}
+button { cursor:pointer; }
 
 .cards {
-  display:grid;
-  grid-template-columns:repeat(6,minmax(0,1fr));
+  display:-webkit-flex;
+  display:flex;
+  -webkit-flex-direction:row;
+  flex-direction:row;
+  -webkit-flex-wrap:nowrap;
+  flex-wrap:nowrap;
   gap:4px;
   margin-top:6px;
   width:100%;
 }
 
 .card {
+  -webkit-flex:1 1 0;
+  flex:1 1 0;
+  width:auto;
+  min-width:0;
   background:#22262c;
   border:1px solid #363b43;
   border-radius:4px;
   padding:4px 5px;
   min-height:0;
-  min-width:0;
   overflow:hidden;
 }
 
@@ -129,40 +131,16 @@ button {
 .card-small {
   font-size:9px;
   color:#9ca3ad;
-  margin-top:1px;
-  white-space:nowrap;
-}
-
-.card-small {
-  font-size:9px;
-  color:#9ca3ad;
   margin-top:2px;
   white-space:nowrap;
 }
 
-.temp {
-  color:#ff625e;
-}
-
-.temp-min {
-  color:#70c9f2;
-}
-
-.pressure {
-  color:#8bd66c;
-}
-
-.humidity {
-  color:#55c8ed;
-}
-
-.uv {
-  color:#c28aff;
-}
-
-.wind {
-  color:#f2ae55;
-}
+.temp { color:#ff625e; }
+.temp-min { color:#70c9f2; }
+.pressure { color:#8bd66c; }
+.humidity { color:#55c8ed; }
+.uv { color:#c28aff; }
+.wind { color:#f2ae55; }
 
 .chart-panel {
   background:#22262c;
@@ -256,9 +234,7 @@ svg {
 
 /* iPad landscape layout */
 @media screen and (min-width:700px) and (orientation:landscape) {
-  body {
-    padding:7px 9px 4px;
-  }
+  body { padding:7px 9px 4px; }
 
   header {
     min-height:68px;
@@ -266,11 +242,26 @@ svg {
   }
 
   .date {
-    font-size:19px;
+    font-size:42px;
+    font-weight:600;
+    line-height:1;
+    letter-spacing:.3px;
   }
 
   .clock {
     font-size:42px;
+  }
+
+  .date-area {
+    flex:2;
+  }
+
+  .clock-area {
+    flex:1;
+  }
+
+  .top {
+    flex:2;
   }
 
   .cards {
@@ -283,27 +274,21 @@ svg {
     padding:5px 8px;
   }
 
-  .card-value {
-    font-size:20px;
-  }
+  .card-value { font-size:20px; }
 
   .chart-panel {
     margin-top:6px;
     padding:7px 9px 5px;
   }
 
-  .chart-heading h2 {
-    font-size:13px;
-  }
+  .chart-heading h2 { font-size:13px; }
 
   .legend {
     margin:4px 0;
     gap:10px;
   }
 
-  .legend label {
-    font-size:10px;
-  }
+  .legend label { font-size:10px; }
 
   #chart {
     height:calc(100vh - 220px);
@@ -311,20 +296,13 @@ svg {
     max-height:570px;
   }
 
-  .status {
-    margin-top:3px;
-  }
-
-  .footer {
-    padding-top:3px;
-  }
+  .status { margin-top:3px; }
+  .footer { padding-top:3px; }
 }
 
 /* Smaller screens and portrait orientation */
 @media screen and (max-width:699px) {
-  body {
-    padding:6px;
-  }
+  body { padding:6px; }
 
   header {
     flex-wrap:wrap;
@@ -339,6 +317,7 @@ svg {
 
   .date {
     font-size:13px;
+    font-weight:600;
   }
 
   .clock-area {
@@ -346,9 +325,7 @@ svg {
     text-align:right;
   }
 
-  .clock {
-    font-size:25px;
-  }
+  .clock { font-size:25px; }
 
   .top {
     flex:none;
@@ -363,57 +340,38 @@ svg {
   }
 
   .cards {
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    -webkit-flex-wrap:wrap;
+    flex-wrap:wrap;
     gap:5px;
   }
 
   .card {
+    -webkit-flex:0 0 32%;
+    flex:0 0 32%;
     min-height:48px;
     padding:6px;
   }
 
-  .card-value {
-    font-size:19px;
-  }
+  .card-value { font-size:19px; }
 
-  .chart-panel {
-    padding:7px;
-  }
+  .chart-panel { padding:7px; }
+  .chart-heading h2 { font-size:12px; }
+  .legend { gap:7px; }
+  .legend label { font-size:9px; }
 
-  .chart-heading h2 {
-    font-size:12px;
-  }
-
-  .legend {
-    gap:7px;
-  }
-
-  .legend label {
-    font-size:9px;
-  }
-
-  #chart {
-    height:350px;
-  }
+  #chart { height:350px; }
 }
 
-/* Very narrow portrait screens */
 @media screen and (max-width:380px) {
-  .date {
-    font-size:11px;
+  .date { font-size:11px; }
+  .clock { font-size:22px; }
+
+  .card {
+    -webkit-flex:0 0 48%;
+    flex:0 0 48%;
   }
 
-  .clock {
-    font-size:22px;
-  }
-
-  .cards {
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
-
-  .chart-heading .subtitle {
-    display:none;
-  }
+  .chart-heading .subtitle { display:none; }
 }
 </style>
 </head>
@@ -421,7 +379,6 @@ svg {
 <body>
 
 <header>
-
   <div class="date-area">
     <div class="date" id="date">Friday, 27 Nov 2026</div>
   </div>
@@ -436,12 +393,9 @@ svg {
     <button id="removeLocation">Remove</button>
     <button id="refresh">Refresh</button>
   </div>
-
 </header>
 
-<!-- Compact six-column measurement strip -->
 <div class="cards">
-
   <div class="card">
     <div class="card-label">Temperature</div>
     <div class="card-value temp" id="temperature">--°</div>
@@ -477,11 +431,9 @@ svg {
     <div class="card-value wind" id="windDirection">--</div>
     <div class="card-small">Compass direction</div>
   </div>
-
 </div>
 
 <div class="chart-panel">
-
   <div class="chart-heading">
     <h2>15 Day Weather History &amp; Forecast</h2>
     <span class="subtitle">DAILY VALUES</span>
@@ -525,7 +477,6 @@ svg {
   </svg>
 
   <div class="status" id="status">Connecting to weather service...</div>
-
 </div>
 
 <div class="footer">
@@ -601,8 +552,9 @@ svg {
     el("clock").innerHTML = now.toLocaleTimeString("en-AU",{
       hour:"numeric",
       minute:"2-digit",
-      hour12:true
-    });
+      hour12:true,
+      timeZoneName:"short"
+    }).replace(/\s*(AEDT|AEST|GMT[+-]\d+|[A-Z]{3,5})$/,"");
 
     el("date").innerHTML = now.toLocaleDateString("en-AU",{
       weekday:"long",
@@ -787,37 +739,22 @@ svg {
 
   function average(a) {
     if (!a.length) return null;
-
     var s = 0;
-
-    for (var i=0;i<a.length;i++) {
-      s += a[i];
-    }
-
+    for (var i=0;i<a.length;i++) s += a[i];
     return s/a.length;
   }
 
   function maximum(a) {
     if (!a.length) return null;
-
     var m = a[0];
-
-    for (var i=1;i<a.length;i++) {
-      if (a[i] > m) m = a[i];
-    }
-
+    for (var i=1;i<a.length;i++) if (a[i] > m) m = a[i];
     return m;
   }
 
   function minimum(a) {
     if (!a.length) return null;
-
     var m = a[0];
-
-    for (var i=1;i<a.length;i++) {
-      if (a[i] < m) m = a[i];
-    }
-
+    for (var i=1;i<a.length;i++) if (a[i] < m) m = a[i];
     return m;
   }
 
@@ -852,73 +789,53 @@ svg {
 
     var html = "";
 
-    /* Horizontal grid lines */
     for (var g=0;g<5;g++) {
       var gy = top+(plotH*g/4);
-
-      html += '<line x1="'+left+
-        '" y1="'+gy+
-        '" x2="'+(W-right)+
-        '" y2="'+gy+
+      html += '<line x1="'+left+'" y1="'+gy+
+        '" x2="'+(W-right)+'" y2="'+gy+
         '" class="gridline"/>';
     }
 
-    /* Find today's position */
     var todayIndex = -1;
 
     for (var i=0;i<days.length;i++) {
-      if (days[i].date === todayKey) {
-        todayIndex = i;
-      }
+      if (days[i].date === todayKey) todayIndex = i;
     }
 
-    /* Today's vertical marker */
     if (todayIndex >= 0) {
-      var tx = left+
-        (plotW*todayIndex/Math.max(1,days.length-1));
+      var tx = left+(plotW*todayIndex/Math.max(1,days.length-1));
 
-      html += '<line x1="'+tx+
-        '" y1="'+top+
-        '" x2="'+tx+
-        '" y2="'+(top+plotH)+
+      html += '<line x1="'+tx+'" y1="'+top+
+        '" x2="'+tx+'" y2="'+(top+plotH)+
         '" class="today-line"/>';
 
       html += '<text x="'+(tx+5)+
         '" y="17" class="today-text">TODAY</text>';
     }
 
-    /* Date labels */
     for (var x=0;x<days.length;x++) {
-      var px = left+
-        (plotW*x/Math.max(1,days.length-1));
-
+      var px = left+(plotW*x/Math.max(1,days.length-1));
       var date = new Date(days[x].date+"T12:00:00");
 
       var label =
         ("0"+date.getDate()).slice(-2)+"/"+
         ("0"+(date.getMonth()+1)).slice(-2);
 
-      html += '<text x="'+px+
-        '" y="'+(H-22)+
+      html += '<text x="'+px+'" y="'+(H-22)+
         '" text-anchor="middle" class="axis-text">'+
         label+'</text>';
     }
 
-    /* Draw each selected graph series */
     for (var s=0;s<series.length;s++) {
       var ser = series[s];
-
       if (!el(ser.id).checked) continue;
 
       var vals = [];
 
       for (var q=0;q<days.length;q++) {
-        if (days[q][ser.key] !== null) {
-          vals.push(days[q][ser.key]);
-        }
+        if (days[q][ser.key] !== null) vals.push(days[q][ser.key]);
 
-        if (ser.key === "temp" &&
-            days[q].tempMin !== null) {
+        if (ser.key === "temp" && days[q].tempMin !== null) {
           vals.push(days[q].tempMin);
         }
       }
@@ -943,53 +860,30 @@ svg {
 
       for (var p=0;p<days.length;p++) {
         var value = days[p][ser.key];
-
         if (value === null) continue;
 
-        var xx = left+
-          (plotW*p/Math.max(1,days.length-1));
+        var xx = left+(plotW*p/Math.max(1,days.length-1));
+        var yy = top+plotH-((value-min)/(max-min))*plotH;
 
-        var yy = top+plotH-
-          ((value-min)/(max-min))*plotH;
+        points.push({x:xx,y:yy,value:value});
 
-        points.push({
-          x:xx,
-          y:yy,
-          value:value
-        });
-
-        if (ser.key === "temp" &&
-            days[p].tempMin !== null) {
-
+        if (ser.key === "temp" && days[p].tempMin !== null) {
           var minValue = days[p].tempMin;
-
-          var minY = top+plotH-
-            ((minValue-min)/(max-min))*plotH;
-
-          minPoints.push({
-            x:xx,
-            y:minY,
-            value:minValue
-          });
+          var minY = top+plotH-((minValue-min)/(max-min))*plotH;
+          minPoints.push({x:xx,y:minY,value:minValue});
         }
       }
 
-      /* Temperature range shading and minimum line */
-      if (ser.key === "temp" &&
-          points.length &&
-          minPoints.length) {
-
+      if (ser.key === "temp" && points.length && minPoints.length) {
         var areaPath = "";
 
         for (var a=0;a<points.length;a++) {
-          areaPath +=
-            (a===0 ? "M" : "L")+
+          areaPath += (a===0 ? "M" : "L")+
             points[a].x+","+points[a].y+" ";
         }
 
         for (var b=minPoints.length-1;b>=0;b--) {
-          areaPath +=
-            "L"+minPoints[b].x+","+minPoints[b].y+" ";
+          areaPath += "L"+minPoints[b].x+","+minPoints[b].y+" ";
         }
 
         areaPath += "Z";
@@ -1000,8 +894,7 @@ svg {
         var minPath = "";
 
         for (var m=0;m<minPoints.length;m++) {
-          minPath +=
-            (m===0 ? "M" : "L")+
+          minPath += (m===0 ? "M" : "L")+
             minPoints[m].x+","+minPoints[m].y+" ";
         }
 
@@ -1012,24 +905,19 @@ svg {
         for (var n=0;n<minPoints.length;n++) {
           var minPt = minPoints[n];
 
-          html += '<circle cx="'+minPt.x+
-            '" cy="'+minPt.y+
+          html += '<circle cx="'+minPt.x+'" cy="'+minPt.y+
             '" r="3.2" fill="#70c9f2"/>';
 
-          html += '<text x="'+minPt.x+
-            '" y="'+(minPt.y+14)+
-            '" text-anchor="middle" fill="#70c9f2" '+
-            'font-size="10">'+
+          html += '<text x="'+minPt.x+'" y="'+(minPt.y+14)+
+            '" text-anchor="middle" fill="#70c9f2" font-size="10">'+
             number(minPt.value,1)+'</text>';
         }
       }
 
-      /* Main series line */
       var path = "";
 
       for (var k=0;k<points.length;k++) {
-        path +=
-          (k===0 ? "M" : "L")+
+        path += (k===0 ? "M" : "L")+
           points[k].x+","+points[k].y+" ";
       }
 
@@ -1037,16 +925,13 @@ svg {
         '" fill="none" stroke="'+ser.color+
         '" stroke-width="2.5" stroke-linejoin="round"/>';
 
-      /* Data points and values */
       for (var z=0;z<points.length;z++) {
         var pt = points[z];
 
-        html += '<circle cx="'+pt.x+
-          '" cy="'+pt.y+
+        html += '<circle cx="'+pt.x+'" cy="'+pt.y+
           '" r="3.2" fill="'+ser.color+'"/>';
 
-        html += '<text x="'+pt.x+
-          '" y="'+(pt.y-7)+
+        html += '<text x="'+pt.x+'" y="'+(pt.y-7)+
           '" text-anchor="middle" fill="'+ser.color+
           '" font-size="10">'+
           number(pt.value,ser.key==="pressure" ? 0 : 1)+
@@ -1065,29 +950,21 @@ svg {
 
     var city = prompt("Enter a city name:");
 
-    if (!city || !city.replace(/^\s+|\s+$/g,"")) {
-      return;
-    }
+    if (!city || !city.replace(/^\s+|\s+$/g,"")) return;
 
     el("status").innerHTML = "Searching for " + city + "...";
 
-    var url = "/api/geocode?name=" +
-      encodeURIComponent(city) +
+    var url = "/api/geocode?name="+
+      encodeURIComponent(city)+
       "&count=5&language=en&format=json";
 
     requestData(url,function(err,data) {
-
       if (err) {
         alert("Geocoding request failed: " + err);
         return;
       }
 
-      if (!data) {
-        alert("No response received from geocoding service.");
-        return;
-      }
-
-      if (!data.results || !data.results.length) {
+      if (!data || !data.results || !data.results.length) {
         alert("No matching city found in geocoding response.");
         return;
       }
@@ -1096,25 +973,16 @@ svg {
       var choices = "";
 
       for (var i=0;i<results.length;i++) {
-        choices +=
-          (i+1) + ". " + results[i].name +
-          (results[i].admin1 ? ", " + results[i].admin1 : "") +
-          (results[i].country ? ", " + results[i].country : "") +
+        choices += (i+1)+". "+results[i].name+
+          (results[i].admin1 ? ", "+results[i].admin1 : "")+
+          (results[i].country ? ", "+results[i].country : "")+
           "\n";
       }
 
-      var answer = prompt(
-        "Choose a location number:\n\n" + choices,
-        "1"
-      );
-
+      var answer = prompt("Choose a location number:\n\n"+choices,"1");
       var choice = parseInt(answer,10)-1;
 
-      if (isNaN(choice) ||
-          choice < 0 ||
-          choice >= results.length) {
-        return;
-      }
+      if (isNaN(choice) || choice<0 || choice>=results.length) return;
 
       var place = results[choice];
 
@@ -1127,16 +995,13 @@ svg {
       }
 
       locations.push({
-        name:place.name+
-          (place.country ? ", "+place.country : ""),
+        name:place.name+(place.country ? ", "+place.country : ""),
         lat:place.latitude,
         lon:place.longitude
       });
 
       saveLocations();
-
       selected = locations.length-1;
-
       populateLocations();
       loadWeather();
     });
@@ -1144,15 +1009,11 @@ svg {
 
   function removeLocation() {
     if (selected === 0) {
-      alert(
-        "Melbourne (Olympic Park) is the default location and cannot be removed."
-      );
+      alert("Melbourne (Olympic Park) is the default location and cannot be removed.");
       return;
     }
 
-    if (!confirm("Remove "+locations[selected].name+"?")) {
-      return;
-    }
+    if (!confirm("Remove "+locations[selected].name+"?")) return;
 
     locations.splice(selected,1);
     selected = 0;
@@ -1181,9 +1042,7 @@ svg {
 
   for (var t=0;t<toggles.length;t++) {
     el(toggles[t]).onchange = function() {
-      if (currentData) {
-        drawChart(currentData);
-      }
+      if (currentData) drawChart(currentData);
     };
   }
 
