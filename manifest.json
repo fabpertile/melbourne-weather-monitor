@@ -1,0 +1,10 @@
+
+{
+  "name": "Melbourne Weather Monitor",
+  "short_name": "Melbourne Weather",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#17191d",
+  "theme_color": "#17191d",
+  "orientation": "landscape"
+}
