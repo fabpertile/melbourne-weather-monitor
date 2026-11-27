@@ -29,36 +29,53 @@ body {
   overflow-x:hidden;
 }
 
+/* Main header: date | time | controls */
 header {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  gap:10px;
+  gap:8px;
   border-bottom:1px solid #383c43;
-  padding:2px 3px 7px;
-  min-height:43px;
+  padding:3px 3px 9px;
+  min-height:65px;
 }
 
-h1 {
-  font-size:19px;
-  font-weight:400;
-  margin:0;
-  letter-spacing:.3px;
+.date-area {
+  flex:1;
+  min-width:0;
+  text-align:left;
   white-space:nowrap;
 }
 
-.subtitle {
-  color:#9299a3;
-  font-size:10px;
-  margin-top:3px;
+.date {
+  font-size:17px;
+  font-weight:400;
+  color:#cbd0d8;
+}
+
+.clock-area {
+  flex:1;
+  min-width:0;
+  text-align:center;
+  white-space:nowrap;
+}
+
+.clock {
+  font-size:36px;
+  font-weight:600;
+  line-height:1;
+  color:#ffffff;
+  letter-spacing:.3px;
 }
 
 .top {
+  flex:2;
   display:flex;
   gap:5px;
   align-items:center;
   justify-content:flex-end;
   flex-wrap:nowrap;
+  min-width:0;
 }
 
 select, button {
@@ -73,26 +90,6 @@ select, button {
 
 button {
   cursor:pointer;
-}
-
-.clock-area {
-  text-align:right;
-  white-space:nowrap;
-  margin-left:5px;
-  min-width:112px;
-}
-
-.clock {
-  font-size:17px;
-  font-weight:600;
-  line-height:1.1;
-  color:#e7e9ed;
-}
-
-.date {
-  font-size:10px;
-  color:#9299a3;
-  margin-top:3px;
 }
 
 .cards {
@@ -179,6 +176,12 @@ button {
   margin:0;
 }
 
+.subtitle {
+  color:#9299a3;
+  font-size:10px;
+  margin-top:3px;
+}
+
 .legend {
   display:flex;
   gap:9px;
@@ -249,12 +252,16 @@ svg {
   }
 
   header {
-    min-height:40px;
-    padding-bottom:6px;
+    min-height:68px;
+    padding:3px 3px 9px;
   }
 
-  h1 {
-    font-size:18px;
+  .date {
+    font-size:19px;
+  }
+
+  .clock {
+    font-size:42px;
   }
 
   .cards {
@@ -290,7 +297,7 @@ svg {
   }
 
   #chart {
-    height:calc(100vh - 205px);
+    height:calc(100vh - 220px);
     min-height:350px;
     max-height:570px;
   }
@@ -311,22 +318,34 @@ svg {
   }
 
   header {
-    align-items:flex-start;
     flex-wrap:wrap;
+    min-height:0;
+    padding-bottom:8px;
   }
 
-  h1 {
-    font-size:16px;
+  .date-area {
+    flex:1;
+    text-align:left;
   }
 
-  .top {
-    justify-content:flex-start;
-    flex-wrap:wrap;
-    width:100%;
+  .date {
+    font-size:13px;
   }
 
   .clock-area {
-    display:none;
+    flex:1;
+    text-align:right;
+  }
+
+  .clock {
+    font-size:25px;
+  }
+
+  .top {
+    flex:none;
+    width:100%;
+    justify-content:flex-start;
+    flex-wrap:wrap;
   }
 
   select, button {
@@ -371,6 +390,14 @@ svg {
 
 /* Very narrow portrait screens */
 @media screen and (max-width:380px) {
+  .date {
+    font-size:11px;
+  }
+
+  .clock {
+    font-size:22px;
+  }
+
   .cards {
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
@@ -385,9 +412,13 @@ svg {
 <body>
 
 <header>
-  <div>
-    <h1>Melbourne Weather Monitor</h1>
-    <div class="subtitle">WEATHER OBSERVATIONS &amp; 15 DAY OUTLOOK</div>
+
+  <div class="date-area">
+    <div class="date" id="date">Friday, 27 Nov 2026</div>
+  </div>
+
+  <div class="clock-area">
+    <div class="clock" id="clock">7:18 PM</div>
   </div>
 
   <div class="top">
@@ -395,12 +426,8 @@ svg {
     <button id="addLocation">+ Add</button>
     <button id="removeLocation">Remove</button>
     <button id="refresh">Refresh</button>
-
-    <div class="clock-area">
-      <div class="clock" id="clock">--:--</div>
-      <div class="date" id="date">--</div>
-    </div>
   </div>
+
 </header>
 
 <!-- Compact six-column measurement strip -->
@@ -570,8 +597,8 @@ svg {
 
     el("date").innerHTML = now.toLocaleDateString("en-AU",{
       weekday:"long",
-      day:"2-digit",
-      month:"2-digit",
+      day:"numeric",
+      month:"short",
       year:"numeric"
     });
   }
