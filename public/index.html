@@ -95,16 +95,18 @@ button {
 .cards {
   display:grid;
   grid-template-columns:repeat(6,minmax(0,1fr));
-  gap:6px;
-  margin-top:7px;
+  gap:4px;
+  margin-top:6px;
+  width:100%;
 }
 
 .card {
   background:#22262c;
   border:1px solid #363b43;
-  border-radius:5px;
-  padding:6px 9px;
-  min-height:52px;
+  border-radius:4px;
+  padding:4px 5px;
+  min-height:0;
+  min-width:0;
   overflow:hidden;
 }
 
@@ -112,15 +114,22 @@ button {
   font-size:9px;
   color:#9ca3ad;
   text-transform:uppercase;
-  letter-spacing:.6px;
+  letter-spacing:.3px;
   white-space:nowrap;
 }
 
 .card-value {
   font-size:21px;
-  margin-top:3px;
+  margin-top:2px;
   font-weight:300;
-  line-height:1.15;
+  line-height:1.1;
+  white-space:nowrap;
+}
+
+.card-small {
+  font-size:9px;
+  color:#9ca3ad;
+  margin-top:1px;
   white-space:nowrap;
 }
 
