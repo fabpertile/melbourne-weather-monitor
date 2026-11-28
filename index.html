@@ -202,7 +202,7 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
     days[now.getDay()];
 
   document.getElementById("clockDate").textContent =
-    SString(now.getDate()).padStart(2, "0") + " " +
+    String(now.getDate()).padStart(2, "0") + " " +
 months[now.getMonth()];
 }
 
