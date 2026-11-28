@@ -780,6 +780,10 @@ function updateClock() {
 
   function drawChart(data) {
     var days = dailyValues(data);
+    console.log("Temperature data:", days.map(function(d) {
+  return {date:d.date, max:d.temp, min:d.tempMin};
+}));
+    
     var svg = el("chart");
 
     var W = 1100;
