@@ -145,7 +145,6 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
     <div class="card-value humidity" id="humidity">--%</div>
     <div class="card-small">Relative humidity</div>
   </div>
-
   <div class="card">
     <div class="card-label">UV Index</div>
     <div class="card-value uv" id="uv">--</div>
@@ -158,6 +157,13 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
     <div class="card-small" id="windSpeed">-- km/h</div>
   </div>
 
+</div>  <!-- Closes cards section -->
+
+<div class="middle">
+  <div class="card">
+    <div class="card-label">Wind Direction</div>
+    <div class="card-value wind" id="windDirection">--</div>
+  </div>
 </div>
 
 <div class="chart-panel">
@@ -165,7 +171,6 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
     <h2>15 Day Weather History &amp; Forecast</h2>
     <span class="subtitle">DAILY VALUES</span>
   </div>
-
   <div class="legend">
     <label><input type="checkbox" id="showTemp" checked> <span class="temp">Temperature</span></label>
     <label><input type="checkbox" id="showPressure" checked> <span class="pressure">Pressure</span></label>
