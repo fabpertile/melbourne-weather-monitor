@@ -1,0 +1,798 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Melbourne Weather">
+<title>Melbourne Weather Monitor</title>
+
+<style>
+* { box-sizing:border-box; }
+body {
+  margin:0; padding:14px;
+  background:#17191d; color:#e7e9ed;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+}
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid #383c43;
+  padding:4px 2px 12px;
+  gap:16px;
+}
+.header-datetime {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  white-space:nowrap;
+  font-size:22px;
+  font-weight:400;
+  letter-spacing:.3px;
+}
+#clockTime, #clockDay, #clockDate {
+  font-size:20px;
+  font-weight:400;
+  font-variant-numeric:tabular-nums;
+}
+select,button {
+  background:#292d34; color:#eee; border:1px solid #454b55;
+  border-radius:5px; padding:8px; font-size:13px;
+}
+button { cursor:pointer; }
+.top { display:flex; gap:9px; align-items:center; }
+.cards {
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:9px;
+  margin-top:13px;
+}
+.card {
+  background:#22262c; border:1px solid #363b43;
+  border-radius:7px; padding:11px 12px; min-height:76px;
+}
+.card-label {
+  font-size:11px; color:#9ca3ad; text-transform:uppercase;
+  letter-spacing:.7px;
+}
+.card-value { font-size:25px; margin-top:8px; font-weight:300; }
+.card-small { font-size:11px; color:#9ca3ad; margin-top:4px; }
+.temp { color:#ff625e; }
+.pressure { color:#8bd66c; }
+.humidity { color:#55c8ed; }
+.uv { color:#c28aff; }
+.wind { color:#f2ae55; }
+.middle {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:9px; margin-top:9px;
+}
+.middle .card { min-height:67px; }
+.middle .card-value { font-size:20px; }
+.chart-panel {
+  background:#22262c; border:1px solid #363b43;
+  border-radius:7px; margin-top:12px; padding:12px;
+}
+.chart-heading {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:8px;
+}
+.chart-heading h2 { font-size:15px; font-weight:400; margin:0; }
+.legend { display:flex; gap:12px; flex-wrap:wrap; margin:9px 0; }
+.legend label { font-size:11px; color:#c4c8ce; white-space:nowrap; }
+.legend input { vertical-align:middle; margin-right:4px; }
+svg { display:block; width:100%; height:auto; overflow:visible; }
+.gridline { stroke:#3a3f47; stroke-width:1; }
+.axis-text { fill:#9ba2ad; font-size:10px; }
+.today-line { stroke:#c7cbd1; stroke-width:1.2; stroke-dasharray:4 4; opacity:.65; }
+.today-text { fill:#d9dce1; font-size:10px; }
+.footer {
+  color:#89919c; font-size:10px; text-align:right;
+  padding:9px 2px;
+}
+.status { color:#aab2bd; font-size:11px; margin-top:8px; }
+@media (max-width:650px) {
+  body { padding:8px; }
+  h1 { font-size:18px; }
+  .cards { grid-template-columns:repeat(3,1fr); }
+  .card-value { font-size:21px; }
+  .top { gap:4px; }
+  select,button { padding:6px; font-size:11px; }
+.clock-large {
+  font-size: 52px !important;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.date-large {
+  font-size: 25px !important;
+  line-height: 1.4;
+}
+</style>
+
+<body>
+<header>
+  <div class="header-datetime">
+    <span id="clockTime">--:--</span>
+    <span id="clockDay">---</span>
+    <span id="clockDate">-- ---</span>
+  </div>
+  <div class="top">
+    <select id="location"></select>
+    <button id="addLocation">+ Add</button>
+    <button id="removeLocation">Remove</button>
+    <button id="refresh">Refresh</button>
+  </div>
+</header>
+
+<div class="cards">
+
+  <div class="card">
+    <div class="card-label">Temperature</div>
+    <div class="card-value temp" id="temperature">--°</div>
+    <div class="card-small">Degrees Celsius</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Pressure</div>
+    <div class="card-value pressure" id="pressure">--</div>
+    <div class="card-small">hPa</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Humidity</div>
+    <div class="card-value humidity" id="humidity">--%</div>
+    <div class="card-small">Relative humidity</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">UV Index</div>
+    <div class="card-value uv" id="uv">--</div>
+    <div class="card-small">UV index</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Wind</div>
+    <div class="card-value wind" id="wind">--</div>
+    <div class="card-small" id="windSpeed">-- km/h</div>
+  </div>
+    <div class="card">
+    <div class="card-label">Wind Direction</div>
+    <div class="card-value wind" id="windDirection">--</div>
+  </div>
+
+</div>
+
+<div class="chart-panel">
+  <div class="chart-heading">
+    <h2>15 Day Weather History &amp; Forecast</h2>
+    <span class="subtitle">DAILY VALUES</span>
+  </div>
+
+  <div class="legend">
+    <label><input type="checkbox" id="showTemp" checked> <span class="temp">Temperature</span></label>
+    <label><input type="checkbox" id="showPressure" checked> <span class="pressure">Pressure</span></label>
+    <label><input type="checkbox" id="showHumidity" checked> <span class="humidity">Humidity</span></label>
+    <label><input type="checkbox" id="showUV" checked> <span class="uv">UV</span></label>
+    <label><input type="checkbox" id="showWind" checked> <span class="wind">Wind</span></label>
+  </div>
+
+  <svg id="chart" viewBox="0 0 1100 390" preserveAspectRatio="none">
+    <text x="550" y="190" text-anchor="middle" class="axis-text">Waiting for weather data...</text>
+  </svg>
+  <div class="status" id="status">Connecting to weather service...</div>
+</div>
+
+<div class="footer">
+  Data: Open-Meteo · Historical and forecast values are model-derived · Refreshes hourly
+</div>
+
+<script>
+  function updateDashboardDateTime() {
+  var now = new Date();
+
+  var hours = now.getHours() % 12 || 12;
+  var minutes = String(now.getMinutes()).padStart(2, "0");
+
+  var days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+                "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+  document.getElementById("clockTime").textContent =
+    hours + ":" + minutes;
+
+  document.getElementById("clockDay").textContent =
+    days[now.getDay()];
+
+  document.getElementById("clockDate").textContent =
+    String(now.getDate()).padStart(2, "0") + " " +
+months[now.getMonth()];
+}
+
+updateDashboardDateTime();
+setInterval(updateDashboardDateTime, 1000);
+(function() {
+  var defaultLocations = [
+    {name:"Melbourne (Olympic Park)",lat:-37.825,lon:144.981}
+  ];
+
+  var locations = defaultLocations.slice(0);
+  try {
+    var saved = localStorage.getItem("mwm_locations");
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      if (parsed && parsed.length) locations = parsed;
+    }
+  } catch(e) {}
+
+  var currentData = null;
+  var selected = 0;
+
+  function el(id) { return document.getElementById(id); }
+
+  function saveLocations() {
+    try { localStorage.setItem("mwm_locations",JSON.stringify(locations)); }
+    catch(e) {}
+  }
+
+  function populateLocations() {
+    var s = el("location");
+    s.innerHTML = "";
+    for (var i=0;i<locations.length;i++) {
+      var o = document.createElement("option");
+      o.value = i;
+      o.appendChild(document.createTextNode(locations[i].name));
+      s.appendChild(o);
+    }
+    s.value = selected;
+  }
+
+  function direction(deg) {
+    if (deg === null || typeof deg === "undefined") return "--";
+    var dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE",
+                "S","SSW","SW","WSW","W","WNW","NW","NNW"];
+    return dirs[Math.round(deg/22.5)%16];
+  }
+
+  function number(v,d) {
+    if (v === null || typeof v === "undefined" || isNaN(v)) return "--";
+    return Number(v).toFixed(d);
+  }
+
+function updateClock() {
+    var now = new Date();
+
+    var clockElement = el("clock");
+    var dateElement = el("date");
+
+    if (clockElement) {
+      clockElement.innerHTML = now.toLocaleTimeString("en-AU",{
+        hour:"numeric",minute:"2-digit",hour12:true
+      });
+    }
+
+    if (dateElement) {
+      dateElement.innerHTML = now.toLocaleDateString("en-AU",{
+        weekday:"long",day:"2-digit",month:"2-digit",year:"numeric"
+      });
+    }
+}
+
+  
+function requestData(url,callback) {
+    var xhr = new XMLHttpRequest();
+    var completed = false;
+
+    function finish(err,data) {
+      if (completed) return;
+      completed = true;
+      callback(err,data);
+    }
+
+    try {
+      xhr.open("GET",url,true);
+      xhr.timeout = 25000;
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              finish(null,JSON.parse(xhr.responseText));
+            } catch(e) {
+              finish(new Error("Invalid weather response: " + e.message));
+            }
+          } else {
+            finish(new Error("Weather service returned HTTP " + xhr.status));
+          }
+        }
+      };
+
+      xhr.onerror = function() {
+        finish(new Error("Network connection failed"));
+      };
+
+      xhr.ontimeout = function() {
+        finish(new Error("Weather request timed out"));
+      };
+
+      xhr.send(null);
+
+    } catch(e) {
+      finish(new Error("Request could not start: " + e.message));
+    }
+  }
+
+var BOM_OBSERVATIONS_URL =
+  "https://www.bom.gov.au/fwo/IDV60901/IDV60901.95936.json";
+
+var BOM_FORECAST_URL =
+  "https://www.bom.gov.au/fwo/IDV10450.xml";
+  function loadWeather() {
+  var loc = locations[selected];
+
+  el("status").innerHTML = "Retrieving weather data... please wait";
+
+  var url = "https://api.open-meteo.com/v1/forecast?latitude=" +
+    encodeURIComponent(loc.lat) + "&longitude=" +
+    encodeURIComponent(loc.lon) +
+    "&hourly=temperature_2m,relative_humidity_2m,pressure_msl,uv_index,wind_direction_10m,wind_speed_10m" +
+    "&past_days=7&forecast_days=7&timezone=auto";
+
+  requestData(url, function(err, data) {
+
+    if (err || !data || !data.hourly) {
+      el("status").innerHTML =
+        "Weather data unavailable. Please try Refresh.";
+      return;
+    }
+
+    currentData = data;
+
+    try {
+      displayCurrent(data);
+    } catch (displayError) {
+      el("status").innerHTML =
+        "Card display error: " + displayError.message;
+      return;
+    }
+
+    try {
+      drawChart(data);
+    } catch (chartError) {
+      el("status").innerHTML =
+        "Graph error: " + chartError.message;
+      return;
+    }
+
+    el("status").innerHTML =
+      "Updated: " + new Date().toLocaleTimeString("en-AU") +
+      " · " + loc.name + " · Model data";
+  });
+}
+
+  function displayCurrent(data) {
+    var h = data.hourly;
+    var now = new Date();
+    var best = 0, bestDiff = 999999999;
+    for (var i=0;i<h.time.length;i++) {
+      var t = new Date(h.time[i]).getTime();
+      var diff = Math.abs(t-now.getTime());
+      if (diff < bestDiff) { bestDiff=diff; best=i; }
+    }
+
+    el("temperature").innerHTML = number(h.temperature_2m[best],1)+"°";
+    el("pressure").innerHTML = number(h.pressure_msl[best],0);
+    el("humidity").innerHTML = number(h.relative_humidity_2m[best],0)+"%";
+    el("uv").innerHTML = number(h.uv_index[best],1);
+    el("wind").innerHTML = number(h.wind_speed_10m[best],0);
+    el("windSpeed").innerHTML = number(h.wind_speed_10m[best],0)+" km/h";
+    el("windDirection").innerHTML = direction(h.wind_direction_10m[best]);
+
+}
+
+function dailyValues(data) {
+    var h=data.hourly, days={}, order=[];
+    for (var i=0;i<h.time.length;i++) {
+      var day=h.time[i].substring(0,10);
+
+      if (!days[day]) {
+        days[day]={
+          temp:[],
+          tempMin:[],
+          pressure:[],
+          humidity:[],
+          uv:[],
+          wind:[]
+        };
+
+        order.push(day);
+      }
+
+      if (h.temperature_2m[i] !== null) {
+        days[day].temp.push(h.temperature_2m[i]);
+        days[day].tempMin.push(h.temperature_2m[i]);
+      }
+
+      if (h.pressure_msl[i] !== null)
+        days[day].pressure.push(h.pressure_msl[i]);
+
+      if (h.relative_humidity_2m[i] !== null)
+        days[day].humidity.push(h.relative_humidity_2m[i]);
+
+      if (h.uv_index[i] !== null)
+        days[day].uv.push(h.uv_index[i]);
+
+      if (h.wind_speed_10m[i] !== null)
+        days[day].wind.push(h.wind_speed_10m[i]);
+    }
+
+    var result=[];
+
+    for (var j=0;j<order.length;j++) {
+      var d=days[order[j]];
+
+      var dailyMin=null;
+
+      if (d.tempMin.length) {
+        dailyMin=d.tempMin[0];
+
+        for (var m=1;m<d.tempMin.length;m++) {
+          if (d.tempMin[m]<dailyMin)
+            dailyMin=d.tempMin[m];
+        }
+      }
+
+      result.push({
+        date:order[j],
+        temp:maximum(d.temp),
+        tempMin:dailyMin,
+        pressure:average(d.pressure),
+        humidity:average(d.humidity),
+        uv:maximum(d.uv),
+        wind:average(d.wind)
+      });
+    }
+
+    return result;
+  }
+
+
+  function average(a) {
+    if (!a.length) return null;
+    var s=0;
+    for (var i=0;i<a.length;i++) s+=a[i];
+    return s/a.length;
+  }
+
+  function maximum(a) {
+    if (!a.length) return null;
+    var m=a[0];
+    for (var i=1;i<a.length;i++) if (a[i]>m) m=a[i];
+    return m;
+  }
+
+
+function drawChart(data) {
+    var days=dailyValues(data);
+    var svg=el("chart");
+
+    var W=1100,H=390,left=35,right=20,top=28,bottom=48;
+    var plotW=W-left-right,plotH=H-top-bottom;
+
+    var today=new Date();
+
+    var todayKey=today.getFullYear()+"-"+
+      ("0"+(today.getMonth()+1)).slice(-2)+"-"+
+      ("0"+today.getDate()).slice(-2);
+
+    var series=[
+      {key:"temp",id:"showTemp",color:"#ff625e"},
+      {key:"pressure",id:"showPressure",color:"#8bd66c"},
+      {key:"humidity",id:"showHumidity",color:"#55c8ed"},
+      {key:"uv",id:"showUV",color:"#c28aff"},
+      {key:"wind",id:"showWind",color:"#f2ae55"}
+    ];
+
+    var html="";
+
+    for (var g=0;g<5;g++) {
+      var gy=top+(plotH*g/4);
+
+      html+='<line x1="'+left+'" y1="'+gy+
+        '" x2="'+(W-right)+'" y2="'+gy+
+        '" class="gridline"/>';
+    }
+
+    var todayIndex=-1;
+
+    for (var i=0;i<days.length;i++) {
+      if (days[i].date===todayKey) todayIndex=i;
+    }
+
+    if (todayIndex>=0) {
+      var tx=left+(plotW*todayIndex/Math.max(1,days.length-1));
+
+      html+='<line x1="'+tx+'" y1="'+top+
+        '" x2="'+tx+'" y2="'+(top+plotH)+
+        '" class="today-line"/>';
+
+      html+='<text x="'+(tx+5)+'" y="17" class="today-text">TODAY</text>';
+    }
+
+    for (var x=0;x<days.length;x++) {
+      var px=left+(plotW*x/Math.max(1,days.length-1));
+      var date=new Date(days[x].date+"T12:00:00");
+
+      var label=("0"+date.getDate()).slice(-2)+
+        "/"+("0"+(date.getMonth()+1)).slice(-2);
+
+      html+='<text x="'+px+'" y="'+(H-22)+
+        '" text-anchor="middle" class="axis-text">'+label+'</text>';
+    }
+
+    for (var s=0;s<series.length;s++) {
+      var ser=series[s];
+
+      if (!el(ser.id).checked) continue;
+
+      var vals=[];
+
+      for (var q=0;q<days.length;q++) {
+        if (days[q][ser.key]!==null)
+          vals.push(days[q][ser.key]);
+
+        if (ser.key==="temp" && days[q].tempMin!==null)
+          vals.push(days[q].tempMin);
+      }
+
+      if (!vals.length) continue;
+
+      var min=vals[0],max=vals[0];
+
+      for (var v=1;v<vals.length;v++) {
+        if (vals[v]<min) min=vals[v];
+        if (vals[v]>max) max=vals[v];
+      }
+
+      if (max===min) {
+        max+=1;
+        min-=1;
+      }
+
+      var points=[];
+      var minPoints=[];
+
+      for (var p=0;p<days.length;p++) {
+        var value=days[p][ser.key];
+
+        if (value===null) continue;
+
+        var xx=left+(plotW*p/Math.max(1,days.length-1));
+        var yy=top+plotH-((value-min)/(max-min))*plotH;
+
+        points.push({x:xx,y:yy,value:value});
+
+        if (ser.key==="temp" && days[p].tempMin!==null) {
+          var minValue=days[p].tempMin;
+
+          var minY=top+plotH-
+            ((minValue-min)/(max-min))*plotH;
+
+          minPoints.push({x:xx,y:minY,value:minValue});
+        }
+      }
+
+      // Minimum temperature shading and line
+      if (ser.key==="temp" && points.length && minPoints.length) {
+
+        var areaPath="";
+
+        for (var a=0;a<points.length;a++) {
+          areaPath+=(a===0?"M":"L")+
+            points[a].x+","+points[a].y+" ";
+        }
+
+        for (var b=minPoints.length-1;b>=0;b--) {
+          areaPath+="L"+
+            minPoints[b].x+","+minPoints[b].y+" ";
+        }
+
+        areaPath+="Z";
+
+        html+='<path d="'+areaPath+
+          '" fill="#ff8b83" fill-opacity="0.16" stroke="none"/>';
+
+        var minPath="";
+
+        for (var m=0;m<minPoints.length;m++) {
+          minPath+=(m===0?"M":"L")+
+            minPoints[m].x+","+minPoints[m].y+" ";
+        }
+
+        html+='<path d="'+minPath+
+          '" fill="none" stroke="#70c9f2" '+
+          'stroke-width="2.5" stroke-linejoin="round"/>';
+
+        for (var n=0;n<minPoints.length;n++) {
+          var minPt=minPoints[n];
+
+          html+='<circle cx="'+minPt.x+'" cy="'+minPt.y+
+            '" r="3.2" fill="#70c9f2"/>';
+
+          html+='<text x="'+minPt.x+'" y="'+(minPt.y+14)+
+            '" text-anchor="middle" fill="#70c9f2" font-size="10">'+
+            number(minPt.value,1)+'</text>';
+        }
+      }
+
+      // Maximum temperature and other weather series
+      var path="";
+
+      for (var k=0;k<points.length;k++) {
+        path+=(k===0?"M":"L")+
+          points[k].x+","+points[k].y+" ";
+      }
+
+      html+='<path d="'+path+
+        '" fill="none" stroke="'+ser.color+
+        '" stroke-width="2.5" stroke-linejoin="round"/>';
+
+      for (var z=0;z<points.length;z++) {
+        var pt=points[z];
+
+        html+='<circle cx="'+pt.x+'" cy="'+pt.y+
+          '" r="3.2" fill="'+ser.color+'"/>';
+
+        html+='<text x="'+pt.x+'" y="'+(pt.y-7)+
+          '" text-anchor="middle" fill="'+ser.color+
+          '" font-size="10">'+
+          number(pt.value,ser.key==="pressure"?0:1)+
+                    '</text>';
+      }
+
+      // CURRENT TEMPERATURE MARKER
+      if (ser.key === "temp" && todayIndex >= 0) {
+
+        var hourly = data.hourly;
+        var currentIndex = 0;
+        var currentDiff = 999999999;
+
+        for (var c = 0; c < hourly.time.length; c++) {
+          var hourTime = new Date(hourly.time[c]).getTime();
+          var diffNow = Math.abs(hourTime - today.getTime());
+
+          if (diffNow < currentDiff) {
+            currentDiff = diffNow;
+            currentIndex = c;
+          }
+        }
+
+        var currentTemp = hourly.temperature_2m[currentIndex];
+
+        if (currentTemp !== null && !isNaN(currentTemp)) {
+
+          var currentX = left +
+            (plotW * todayIndex / Math.max(1, days.length - 1));
+
+          var currentY = top + plotH -
+            ((currentTemp - min) / (max - min)) * plotH;
+
+          html += '<circle cx="' + currentX + '" cy="' + currentY +
+            '" r="7" fill="#ff625e" stroke="#ffffff" stroke-width="2.5"/>';
+
+          html += '<circle cx="' + currentX + '" cy="' + currentY +
+            '" r="2.5" fill="#ffffff"/>';
+        }
+      }
+    }
+
+    svg.innerHTML = html;
+  }
+
+
+  function addLocation() {
+    if (locations.length >= 6) {
+      alert("You can save a maximum of six locations.");
+      return;
+    }
+
+    var city = prompt("Enter a city name:");
+    if (!city || !city.replace(/^\s+|\s+$/g,"")) return;
+
+    el("status").innerHTML = "Searching for " + city + "...";
+
+    var url = "https://geocoding-api.open-meteo.com/v1/search?name=" +
+      encodeURIComponent(city) + "&count=5&language=en&format=json";
+
+    requestData(url,function(err,data) {
+  if (err) {
+    alert("Geocoding request failed: " + err);
+    return;
+  }
+
+  if (!data) {
+    alert("No response received from geocoding service.");
+    return;
+  }
+
+  if (!data.results || !data.results.length) {
+    alert("No matching city found in geocoding response.");
+    return;
+  }
+
+      var results = data.results;
+      var choices = "";
+      for (var i=0;i<results.length;i++) {
+        choices += (i+1) + ". " + results[i].name +
+          (results[i].admin1 ? ", " + results[i].admin1 : "") +
+          (results[i].country ? ", " + results[i].country : "") + "\n";
+      }
+
+      var answer = prompt("Choose a location number:\n\n" + choices,"1");
+      var choice = parseInt(answer,10)-1;
+
+      if (isNaN(choice) || choice < 0 || choice >= results.length) return;
+
+      var place = results[choice];
+      for (var j=0;j<locations.length;j++) {
+        if (Math.abs(locations[j].lat-place.latitude)<0.01 &&
+            Math.abs(locations[j].lon-place.longitude)<0.01) {
+          alert("This location is already saved.");
+          return;
+        }
+      }
+
+      locations.push({
+        name: place.name + (place.country ? ", " + place.country : ""),
+        lat: place.latitude,
+        lon: place.longitude
+      });
+
+      saveLocations();
+      selected = locations.length-1;
+      populateLocations();
+      loadWeather();
+    });
+  }
+
+  function removeLocation() {
+    if (selected === 0) {
+      alert("Melbourne (Olympic Park) is the default location and cannot be removed.");
+      return;
+    }
+
+    if (!confirm("Remove " + locations[selected].name + "?")) return;
+
+    locations.splice(selected,1);
+    selected = 0;
+    saveLocations();
+    populateLocations();
+    loadWeather();
+  }
+
+  el("location").onchange=function() {
+    selected=parseInt(this.value,10)||0;
+    loadWeather();
+  };
+  el("refresh").onclick=loadWeather;
+el("addLocation").onclick=addLocation;
+el("removeLocation").onclick=removeLocation;
+  var toggles=["showTemp","showPressure","showHumidity","showUV","showWind"];
+  for (var t=0;t<toggles.length;t++) {
+    el(toggles[t]).onchange=function() {
+      if (currentData) drawChart(currentData);
+    };
+  }
+
+  populateLocations();
+  updateClock();
+  loadWeather();
+
+  window.setInterval(updateClock,30000);
+  window.setInterval(loadWeather,3600000);
+})();
+</script>
+</body>
+</html>
