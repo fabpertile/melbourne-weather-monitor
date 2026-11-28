@@ -317,7 +317,8 @@ function requestData(url,callback) {
     } catch(e) {
       finish(new Error("Request could not start: " + e.message));
     }
-}
+  }
+
 var BOM_OBSERVATIONS_URL =
   "https://www.bom.gov.au/fwo/IDV60901/IDV60901.95936.json";
 
@@ -361,12 +362,11 @@ var BOM_FORECAST_URL =
     el("wind").innerHTML = number(h.wind_speed_10m[best],0);
     el("windSpeed").innerHTML = number(h.wind_speed_10m[best],0)+" km/h";
     el("windDirection").innerHTML = direction(h.wind_direction_10m[best]);
-  }
 
-  
+}
+
 function dailyValues(data) {
     var h=data.hourly, days={}, order=[];
-
     for (var i=0;i<h.time.length;i++) {
       var day=h.time[i].substring(0,10);
 
