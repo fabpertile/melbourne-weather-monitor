@@ -337,9 +337,17 @@ var BOM_FORECAST_URL =
         el("status").innerHTML = "Weather data unavailable. Please try Refresh.";
         return;
       }
-      currentData = data;
+            currentData = data;
       displayCurrent(data);
-      drawChart(data);
+
+      try {
+        drawChart(data);
+      } catch (chartError) {
+        el("status").innerHTML =
+          "Graph error: " + chartError.message;
+        return;
+      }
+
       el("status").innerHTML = "Updated: "+new Date().toLocaleTimeString("en-AU")+
         " · "+loc.name+" · Model data";
     });
