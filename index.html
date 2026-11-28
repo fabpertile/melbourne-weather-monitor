@@ -649,11 +649,46 @@ function drawChart(data) {
           '" text-anchor="middle" fill="'+ser.color+
           '" font-size="10">'+
           number(pt.value,ser.key==="pressure"?0:1)+
-          '</text>';
+                    '</text>';
+      }
+
+      // CURRENT TEMPERATURE MARKER
+      if (ser.key === "temp" && todayIndex >= 0) {
+
+        var hourly = data.hourly;
+        var currentIndex = 0;
+        var currentDiff = 999999999;
+
+        for (var c = 0; c < hourly.time.length; c++) {
+          var hourTime = new Date(hourly.time[c]).getTime();
+          var diffNow = Math.abs(hourTime - today.getTime());
+
+          if (diffNow < currentDiff) {
+            currentDiff = diffNow;
+            currentIndex = c;
+          }
+        }
+
+        var currentTemp = hourly.temperature_2m[currentIndex];
+
+        if (currentTemp !== null && !isNaN(currentTemp)) {
+
+          var currentX = left +
+            (plotW * todayIndex / Math.max(1, days.length - 1));
+
+          var currentY = top + plotH -
+            ((currentTemp - min) / (max - min)) * plotH;
+
+          html += '<circle cx="' + currentX + '" cy="' + currentY +
+            '" r="7" fill="#ff625e" stroke="#ffffff" stroke-width="2.5"/>';
+
+          html += '<circle cx="' + currentX + '" cy="' + currentY +
+            '" r="2.5" fill="#ffffff"/>';
+        }
       }
     }
 
-    svg.innerHTML=html;
+    svg.innerHTML = html;
   }
 
 
