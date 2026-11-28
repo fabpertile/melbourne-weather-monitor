@@ -17,11 +17,30 @@ body {
   font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
 }
 header {
-  display:flex; justify-content:space-between; align-items:center;
-  border-bottom:1px solid #383c43; padding:4px 2px 12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid #383c43;
+  padding:4px 2px 12px;
+  gap:16px;
 }
-h1 { font-size:23px; font-weight:400; margin:0; letter-spacing:.3px; }
-.subtitle { color:#9299a3; font-size:11px; margin-top:5px; }
+.header-datetime {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  white-space:nowrap;
+  font-size:22px;
+  font-weight:400;
+  letter-spacing:.3px;
+}
+#clockTime {
+  font-size:25px;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
+#clockDay, #clockDate {
+  font-size:18px;
+}
 select,button {
   background:#292d34; color:#eee; border:1px solid #454b55;
   border-radius:5px; padding:8px; font-size:13px;
@@ -96,16 +115,18 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
 
 <body>
 <header>
-  <div>
-    <h1>Melbourne Weather Monitor</h1>
-    <div class="subtitle">WEATHER OBSERVATIONS &amp; 15 DAY OUTLOOK</div>
+  <div class="header-datetime">
+    <span id="clockTime">--:--</span>
+    <span id="clockDay">---</span>
+    <span id="clockDate">--/---</span>
   </div>
   <div class="top">
     <select id="location"></select>
     <button id="addLocation">+ Add</button>
     <button id="removeLocation">Remove</button>
     <button id="refresh">Refresh</button>
-</div>
+  </div>
+</header>
 </header>
 
 <div class="cards">
@@ -173,6 +194,29 @@ svg { display:block; width:100%; height:auto; overflow:visible; }
 </div>
 
 <script>
+  function updateDashboardDateTime() {
+  var now = new Date();
+
+  var hours = now.getHours() % 12 || 12;
+  var minutes = String(now.getMinutes()).padStart(2, "0");
+
+  var days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+                "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+  document.getElementById("clockTime").textContent =
+    hours + ":" + minutes;
+
+  document.getElementById("clockDay").textContent =
+    days[now.getDay()];
+
+  document.getElementById("clockDate").textContent =
+    String(now.getDate()).padStart(2, "0") + "/" +
+    months[now.getMonth()];
+}
+
+updateDashboardDateTime();
+setInterval(updateDashboardDateTime, 1000);
 (function() {
   var defaultLocations = [
     {name:"Melbourne (Olympic Park)",lat:-37.825,lon:144.981}
