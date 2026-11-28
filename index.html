@@ -325,33 +325,47 @@ var BOM_OBSERVATIONS_URL =
 var BOM_FORECAST_URL =
   "https://www.bom.gov.au/fwo/IDV10450.xml";
   function loadWeather() {
-    var loc = locations[selected];
-    el("status").innerHTML = "Retrieving weather data... please wait";
-    var url = "https://api.open-meteo.com/v1/forecast?latitude="+
-      encodeURIComponent(loc.lat)+"&longitude="+encodeURIComponent(loc.lon)+
-      "&hourly=temperature_2m,relative_humidity_2m,pressure_msl,uv_index,wind_direction_10m,wind_speed_10m"+
-      "&past_days=7&forecast_days=7&timezone=auto";
+  var loc = locations[selected];
 
-    requestData(url,function(err,data) {
-      if (err || !data || !data.hourly) {
-        el("status").innerHTML = "Weather data unavailable. Please try Refresh.";
-        return;
-      }
-            currentData = data;
+  el("status").innerHTML = "Retrieving weather data... please wait";
+
+  var url = "https://api.open-meteo.com/v1/forecast?latitude=" +
+    encodeURIComponent(loc.lat) + "&longitude=" +
+    encodeURIComponent(loc.lon) +
+    "&hourly=temperature_2m,relative_humidity_2m,pressure_msl,uv_index,wind_direction_10m,wind_speed_10m" +
+    "&past_days=7&forecast_days=7&timezone=auto";
+
+  requestData(url, function(err, data) {
+
+    if (err || !data || !data.hourly) {
+      el("status").innerHTML =
+        "Weather data unavailable. Please try Refresh.";
+      return;
+    }
+
+    currentData = data;
+
+    try {
       displayCurrent(data);
+    } catch (displayError) {
+      el("status").innerHTML =
+        "Card display error: " + displayError.message;
+      return;
+    }
 
-      try {
-        drawChart(data);
-      } catch (chartError) {
-        el("status").innerHTML =
-          "Graph error: " + chartError.message;
-        return;
-      }
+    try {
+      drawChart(data);
+    } catch (chartError) {
+      el("status").innerHTML =
+        "Graph error: " + chartError.message;
+      return;
+    }
 
-      el("status").innerHTML = "Updated: "+new Date().toLocaleTimeString("en-AU")+
-        " · "+loc.name+" · Model data";
-    });
-  }
+    el("status").innerHTML =
+      "Updated: " + new Date().toLocaleTimeString("en-AU") +
+      " · " + loc.name + " · Model data";
+  });
+}
 
   function displayCurrent(data) {
     var h = data.hourly;
