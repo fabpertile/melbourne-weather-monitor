@@ -319,35 +319,74 @@ var BOM_FORECAST_URL =
     el("windDirection").innerHTML = direction(h.wind_direction_10m[best]);
   }
 
-  function dailyValues(data) {
+  
+function dailyValues(data) {
     var h=data.hourly, days={}, order=[];
+
     for (var i=0;i<h.time.length;i++) {
       var day=h.time[i].substring(0,10);
+
       if (!days[day]) {
-        days[day]={temp:[],pressure:[],humidity:[],uv:[],wind:[]};
+        days[day]={
+          temp:[],
+          tempMin:[],
+          pressure:[],
+          humidity:[],
+          uv:[],
+          wind:[]
+        };
+
         order.push(day);
       }
-      if (h.temperature_2m[i] !== null) days[day].temp.push(h.temperature_2m[i]);
-      if (h.pressure_msl[i] !== null) days[day].pressure.push(h.pressure_msl[i]);
-      if (h.relative_humidity_2m[i] !== null) days[day].humidity.push(h.relative_humidity_2m[i]);
-      if (h.uv_index[i] !== null) days[day].uv.push(h.uv_index[i]);
-      if (h.wind_speed_10m[i] !== null) days[day].wind.push(h.wind_speed_10m[i]);
+
+      if (h.temperature_2m[i] !== null) {
+        days[day].temp.push(h.temperature_2m[i]);
+        days[day].tempMin.push(h.temperature_2m[i]);
+      }
+
+      if (h.pressure_msl[i] !== null)
+        days[day].pressure.push(h.pressure_msl[i]);
+
+      if (h.relative_humidity_2m[i] !== null)
+        days[day].humidity.push(h.relative_humidity_2m[i]);
+
+      if (h.uv_index[i] !== null)
+        days[day].uv.push(h.uv_index[i]);
+
+      if (h.wind_speed_10m[i] !== null)
+        days[day].wind.push(h.wind_speed_10m[i]);
     }
 
     var result=[];
+
     for (var j=0;j<order.length;j++) {
       var d=days[order[j]];
+
+      var dailyMin=null;
+
+      if (d.tempMin.length) {
+        dailyMin=d.tempMin[0];
+
+        for (var m=1;m<d.tempMin.length;m++) {
+          if (d.tempMin[m]<dailyMin)
+            dailyMin=d.tempMin[m];
+        }
+      }
+
       result.push({
         date:order[j],
-        temp:average(d.temp),
+        temp:maximum(d.temp),
+        tempMin:dailyMin,
         pressure:average(d.pressure),
         humidity:average(d.humidity),
         uv:maximum(d.uv),
         wind:average(d.wind)
       });
     }
+
     return result;
   }
+
 
   function average(a) {
     if (!a.length) return null;
@@ -363,13 +402,20 @@ var BOM_FORECAST_URL =
     return m;
   }
 
-  function drawChart(data) {
+
+function drawChart(data) {
     var days=dailyValues(data);
     var svg=el("chart");
+
     var W=1100,H=390,left=35,right=20,top=28,bottom=48;
     var plotW=W-left-right,plotH=H-top-bottom;
+
     var today=new Date();
-    var todayKey=today.getFullYear()+"-"+("0"+(today.getMonth()+1)).slice(-2)+"-"+("0"+today.getDate()).slice(-2);
+
+    var todayKey=today.getFullYear()+"-"+
+      ("0"+(today.getMonth()+1)).slice(-2)+"-"+
+      ("0"+today.getDate()).slice(-2);
+
     var series=[
       {key:"temp",id:"showTemp",color:"#ff625e"},
       {key:"pressure",id:"showPressure",color:"#8bd66c"},
@@ -379,65 +425,166 @@ var BOM_FORECAST_URL =
     ];
 
     var html="";
+
     for (var g=0;g<5;g++) {
       var gy=top+(plotH*g/4);
-      html+='<line x1="'+left+'" y1="'+gy+'" x2="'+(W-right)+'" y2="'+gy+'" class="gridline"/>';
+
+      html+='<line x1="'+left+'" y1="'+gy+
+        '" x2="'+(W-right)+'" y2="'+gy+
+        '" class="gridline"/>';
     }
 
     var todayIndex=-1;
+
     for (var i=0;i<days.length;i++) {
       if (days[i].date===todayKey) todayIndex=i;
     }
+
     if (todayIndex>=0) {
       var tx=left+(plotW*todayIndex/Math.max(1,days.length-1));
-      html+='<line x1="'+tx+'" y1="'+top+'" x2="'+tx+'" y2="'+(top+plotH)+'" class="today-line"/>';
+
+      html+='<line x1="'+tx+'" y1="'+top+
+        '" x2="'+tx+'" y2="'+(top+plotH)+
+        '" class="today-line"/>';
+
       html+='<text x="'+(tx+5)+'" y="17" class="today-text">TODAY</text>';
     }
 
     for (var x=0;x<days.length;x++) {
       var px=left+(plotW*x/Math.max(1,days.length-1));
       var date=new Date(days[x].date+"T12:00:00");
-      var label=("0"+date.getDate()).slice(-2)+"/"+("0"+(date.getMonth()+1)).slice(-2);
-      html+='<text x="'+px+'" y="'+(H-22)+'" text-anchor="middle" class="axis-text">'+label+'</text>';
+
+      var label=("0"+date.getDate()).slice(-2)+
+        "/"+("0"+(date.getMonth()+1)).slice(-2);
+
+      html+='<text x="'+px+'" y="'+(H-22)+
+        '" text-anchor="middle" class="axis-text">'+label+'</text>';
     }
 
     for (var s=0;s<series.length;s++) {
       var ser=series[s];
+
       if (!el(ser.id).checked) continue;
+
       var vals=[];
+
       for (var q=0;q<days.length;q++) {
-        if (days[q][ser.key]!==null) vals.push(days[q][ser.key]);
+        if (days[q][ser.key]!==null)
+          vals.push(days[q][ser.key]);
+
+        if (ser.key==="temp" && days[q].tempMin!==null)
+          vals.push(days[q].tempMin);
       }
+
       if (!vals.length) continue;
+
       var min=vals[0],max=vals[0];
+
       for (var v=1;v<vals.length;v++) {
         if (vals[v]<min) min=vals[v];
         if (vals[v]>max) max=vals[v];
       }
-      if (max===min) { max+=1; min-=1; }
+
+      if (max===min) {
+        max+=1;
+        min-=1;
+      }
 
       var points=[];
+      var minPoints=[];
+
       for (var p=0;p<days.length;p++) {
         var value=days[p][ser.key];
+
         if (value===null) continue;
+
         var xx=left+(plotW*p/Math.max(1,days.length-1));
         var yy=top+plotH-((value-min)/(max-min))*plotH;
+
         points.push({x:xx,y:yy,value:value});
+
+        if (ser.key==="temp" && days[p].tempMin!==null) {
+          var minValue=days[p].tempMin;
+
+          var minY=top+plotH-
+            ((minValue-min)/(max-min))*plotH;
+
+          minPoints.push({x:xx,y:minY,value:minValue});
+        }
       }
 
-      var path="";
-      for (var k=0;k<points.length;k++) {
-        path+=(k===0?"M":"L")+points[k].x+","+points[k].y+" ";
+      // Minimum temperature shading and line
+      if (ser.key==="temp" && points.length && minPoints.length) {
+
+        var areaPath="";
+
+        for (var a=0;a<points.length;a++) {
+          areaPath+=(a===0?"M":"L")+
+            points[a].x+","+points[a].y+" ";
+        }
+
+        for (var b=minPoints.length-1;b>=0;b--) {
+          areaPath+="L"+
+            minPoints[b].x+","+minPoints[b].y+" ";
+        }
+
+        areaPath+="Z";
+
+        html+='<path d="'+areaPath+
+          '" fill="#ff8b83" fill-opacity="0.16" stroke="none"/>';
+
+        var minPath="";
+
+        for (var m=0;m<minPoints.length;m++) {
+          minPath+=(m===0?"M":"L")+
+            minPoints[m].x+","+minPoints[m].y+" ";
+        }
+
+        html+='<path d="'+minPath+
+          '" fill="none" stroke="#70c9f2" '+
+          'stroke-width="2.5" stroke-linejoin="round"/>';
+
+        for (var n=0;n<minPoints.length;n++) {
+          var minPt=minPoints[n];
+
+          html+='<circle cx="'+minPt.x+'" cy="'+minPt.y+
+            '" r="3.2" fill="#70c9f2"/>';
+
+          html+='<text x="'+minPt.x+'" y="'+(minPt.y+14)+
+            '" text-anchor="middle" fill="#70c9f2" font-size="10">'+
+            number(minPt.value,1)+'</text>';
+        }
       }
-      html+='<path d="'+path+'" fill="none" stroke="'+ser.color+'" stroke-width="2.5" stroke-linejoin="round"/>';
+
+      // Maximum temperature and other weather series
+      var path="";
+
+      for (var k=0;k<points.length;k++) {
+        path+=(k===0?"M":"L")+
+          points[k].x+","+points[k].y+" ";
+      }
+
+      html+='<path d="'+path+
+        '" fill="none" stroke="'+ser.color+
+        '" stroke-width="2.5" stroke-linejoin="round"/>';
+
       for (var z=0;z<points.length;z++) {
         var pt=points[z];
-        html+='<circle cx="'+pt.x+'" cy="'+pt.y+'" r="3.2" fill="'+ser.color+'"/>';
-        html+='<text x="'+pt.x+'" y="'+(pt.y-7)+'" text-anchor="middle" fill="'+ser.color+'" font-size="10">'+number(pt.value,ser.key==="pressure"?0:1)+'</text>';
+
+        html+='<circle cx="'+pt.x+'" cy="'+pt.y+
+          '" r="3.2" fill="'+ser.color+'"/>';
+
+        html+='<text x="'+pt.x+'" y="'+(pt.y-7)+
+          '" text-anchor="middle" fill="'+ser.color+
+          '" font-size="10">'+
+          number(pt.value,ser.key==="pressure"?0:1)+
+          '</text>';
       }
     }
+
     svg.innerHTML=html;
   }
+
 
   function addLocation() {
     if (locations.length >= 6) {
